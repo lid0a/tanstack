@@ -13,7 +13,7 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
 
 const formSchema = z.object({
-  todo: z.string().min(1, "Title cannot be empty").optional(),
+  todo: z.string().min(1, "Title cannot be empty"),
   completed: z.boolean().default(false).optional(),
 });
 

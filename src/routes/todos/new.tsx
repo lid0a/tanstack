@@ -8,12 +8,7 @@ export const Route = createFileRoute("/todos/new")({
 });
 
 function RouteComponent() {
-  const {
-    // mutate,
-    isPending,
-    error,
-    isSuccess,
-  } = useCreateTodo();
+  const { mutate, isPending, error, isSuccess } = useCreateTodo();
 
   useMessage("success", isSuccess ? "Created successfully" : null);
   useMessage("error", error?.message);
@@ -22,9 +17,9 @@ function RouteComponent() {
     <Form
       label="Create new todo"
       defaultValues={{ todo: "", completed: false }}
-      // onSubmit={(data) => {
-      //   mutate({ ...data, userId: 1 });
-      // }}
+      onSubmit={(data) => {
+        mutate({ ...data, userId: 1 });
+      }}
       disabled={isPending}
     />
   );
