@@ -2,7 +2,7 @@ import {
   Controller,
   useForm,
   type SubmitErrorHandler,
-  type SubmitHandler,
+  type UseFormReset,
 } from "react-hook-form";
 import { Field, FieldError, FieldLabel } from "~/components/ui/field";
 import { Input } from "~/components/ui/input";
@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form as GenericForm } from "~/ui/shared/form";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
+import type { BaseSyntheticEvent } from "react";
 
 const formSchema = z.object({
   todo: z.string().min(1, "Title cannot be empty"),
@@ -28,11 +29,15 @@ export function Form({
 }: {
   label: string;
   defaultValues?: FormSchema;
-  onSubmit?: SubmitHandler<FormSchema>;
+  onSubmit?: (
+    data: FormSchema,
+    event?: BaseSyntheticEvent,
+    ctx?: { reset?: UseFormReset<FormSchema> },
+  ) => unknown | Promise<unknown>;
   onError?: SubmitErrorHandler<FormSchema>;
   disabled?: boolean;
 }) {
-  const { control, handleSubmit } = useForm<FormSchema>({
+  const { control, handleSubmit, reset } = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
@@ -40,7 +45,9 @@ export function Form({
   return (
     <GenericForm
       label={label}
-      onSubmit={handleSubmit(onSubmit, onError)}
+      onSubmit={handleSubmit(async (data, event) => {
+        await onSubmit(data, event, { reset });
+      }, onError)}
       disabled={disabled}
     >
       <Controller
