@@ -4,20 +4,7 @@ import { DataTable } from "~/ui/shared/data-table";
 import { Badge } from "~/components/ui/badge";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { create } from "zustand";
-import { Button } from "~/components/ui/button";
-import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
-
-type Selection = { [key: number]: boolean };
-
-const useSelectedTodos = create<{
-  selection: Selection;
-  select: (selection: Selection) => void;
-}>((set) => ({
-  selection: {},
-  select: (selection: Selection) => set(() => ({ selection })),
-}));
 
 const columns: ColumnDef<Todo>[] = [
   {
@@ -73,8 +60,6 @@ const columns: ColumnDef<Todo>[] = [
 export function List() {
   const { page, limit } = useSearch({ from: "/todos/" });
   const navigate = useNavigate();
-  const selectedRows = useSelectedTodos((state) => state.selection);
-  const selectRow = useSelectedTodos((state) => state.select);
   const { data, isPending, error, refetch } = useTodos({
     limit,
     skip: (page - 1) * limit,
@@ -91,30 +76,6 @@ export function List() {
 
   return (
     <>
-      <div className="h-11 flex items-center">
-        {Object.keys(selectedRows).length > 0 && (
-          <Button
-            size="icon"
-            variant="destructive"
-            onClick={() => {
-              for (const index in selectedRows) {
-                const { id } = data.todos[index];
-                mutate(id, {
-                  async onSuccess() {
-                    await refetch();
-                    toast.success("Deleted successfully");
-                  },
-                  onError(error) {
-                    toast.error(error.message);
-                  },
-                });
-              }
-            }}
-          >
-            <Trash2 />
-          </Button>
-        )}
-      </div>
       <DataTable
         columns={columns}
         data={[...data.todos]}
@@ -133,7 +94,19 @@ export function List() {
             },
           });
         }}
-        onRowSelectionChange={selectRow}
+        onDelete={async (items) => {
+          for (const item of items) {
+            mutate(item.id, {
+              onSuccess() {
+                toast.success("Deleted successfully");
+                refetch();
+              },
+              onError(error) {
+                toast.error(error.message);
+              },
+            });
+          }
+        }}
         totalItems={data.total}
       />
     </>

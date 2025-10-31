@@ -9,7 +9,6 @@ import {
   type OnChangeFn,
   type PaginationState,
   type Table as ReactTable,
-  type RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -17,6 +16,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Trash2Icon,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
@@ -42,7 +42,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   pagination?: PaginationState;
   onPaginationChange?: OnChangeFn<PaginationState>;
-  onRowSelectionChange?: (selection: RowSelectionState) => void;
+  onDelete?: (data: TData[]) => void;
   totalItems?: number;
 }
 
@@ -52,22 +52,15 @@ export function DataTable<TData, TValue>({
   totalItems,
   pagination,
   onPaginationChange,
-  onRowSelectionChange,
+  onDelete = () => {},
 }: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = useState({});
+  const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onRowSelectionChange: (updaterOrValue) => {
-      setRowSelection(updaterOrValue);
-      if (typeof updaterOrValue === "function") {
-        onRowSelectionChange?.(updaterOrValue(rowSelection));
-      } else {
-        onRowSelectionChange?.(updaterOrValue);
-      }
-    },
+    onRowSelectionChange: setRowSelection,
     manualPagination: Boolean(pagination),
     rowCount: totalItems,
     onPaginationChange,
@@ -78,7 +71,28 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div>
+    <>
+      <div className="h-14 flex items-center">
+        {Object.keys(rowSelection).length > 0 && (
+          <Button
+            size="icon"
+            variant="destructive"
+            onClick={() => {
+              const items = Object.keys(rowSelection).reduce(
+                (acc: TData[], index) => {
+                  acc.push(data[Number(index)]);
+                  return acc;
+                },
+                [],
+              );
+              onDelete(items);
+              setRowSelection({});
+            }}
+          >
+            <Trash2Icon />
+          </Button>
+        )}
+      </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -130,7 +144,7 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
-    </div>
+    </>
   );
 }
 
