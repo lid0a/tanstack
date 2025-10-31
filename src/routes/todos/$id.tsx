@@ -10,7 +10,7 @@ export const Route = createFileRoute("/todos/$id")({
 function RouteComponent() {
   const params = Route.useParams();
   const id = Number(params.id);
-  const { data, isPending, error } = useTodo(id);
+  const { data, isPending, error, refetch } = useTodo(id);
   const { mutate, isPending: isMutationPending } = useUpdateTodo(id);
 
   if (isPending) {
@@ -28,6 +28,7 @@ function RouteComponent() {
       onSubmit={(data) => {
         mutate(data, {
           onSuccess() {
+            refetch();
             toast.success("Updated successfully");
           },
           onError(error) {
