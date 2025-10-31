@@ -9,6 +9,7 @@ import {
   type OnChangeFn,
   type PaginationState,
   type Table as ReactTable,
+  type RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -41,6 +42,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   pagination?: PaginationState;
   onPaginationChange?: OnChangeFn<PaginationState>;
+  onRowSelectionChange?: (selection: RowSelectionState) => void;
   totalItems?: number;
 }
 
@@ -50,6 +52,7 @@ export function DataTable<TData, TValue>({
   totalItems,
   pagination,
   onPaginationChange,
+  onRowSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
   const table = useReactTable({
@@ -57,7 +60,14 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: (updaterOrValue) => {
+      setRowSelection(updaterOrValue);
+      if (typeof updaterOrValue === "function") {
+        onRowSelectionChange?.(updaterOrValue(rowSelection));
+      } else {
+        onRowSelectionChange?.(updaterOrValue);
+      }
+    },
     manualPagination: Boolean(pagination),
     rowCount: totalItems,
     onPaginationChange,

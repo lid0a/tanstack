@@ -11,11 +11,13 @@ export async function request<T>(
   > = {},
   config: Omit<RequestInit, "body"> & { body?: object } = {},
 ) {
-  const url = new URL(endpoint, "https://dummyjson.com");
+  const url = new URL(endpoint, "http://localhost:8080");
   const searchParams = new URLSearchParams();
   searchParams.set("timestamp", String(Date.now()));
   const headers = new Headers(config.headers);
-  headers.append("content-type", "application/json");
+  if (config.body) {
+    headers.append("content-type", "application/json");
+  }
   for (const name in params) {
     const value = params[name];
     if (Array.isArray(value)) {
@@ -41,5 +43,9 @@ export async function request<T>(
     }
     throw new Error(String(errorData));
   }
-  return (await response.json()) as T;
+  try {
+    return (await response.json()) as T;
+  } catch {
+    return undefined as T;
+  }
 }

@@ -45,6 +45,12 @@ export async function updateTodo(id: number, dto: UpdateTodoDto) {
   });
 }
 
+export async function deleteTodo(id: number) {
+  return await request<void>(`todos/${id}`, undefined, {
+    method: "DELETE",
+  });
+}
+
 export function useTodos({
   limit,
   skip,
@@ -77,5 +83,11 @@ export function useCreateTodo() {
   return useMutation({
     mutationKey,
     mutationFn: (dto: CreateTodoDto) => createTodo(dto),
+  });
+}
+
+export function useDeleteTodo() {
+  return useMutation({
+    mutationFn: (id: number) => deleteTodo(id),
   });
 }
