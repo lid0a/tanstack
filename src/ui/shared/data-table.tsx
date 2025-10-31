@@ -36,6 +36,12 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { DeleteModal } from "./delete-modal";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -44,6 +50,7 @@ interface DataTableProps<TData, TValue> {
   onPaginationChange?: OnChangeFn<PaginationState>;
   onDelete?: (data: TData[]) => void;
   totalItems?: number;
+  getItemTitle?: (data: TData) => string;
 }
 
 export function DataTable<TData, TValue>({
@@ -53,6 +60,7 @@ export function DataTable<TData, TValue>({
   pagination,
   onPaginationChange,
   onDelete = () => {},
+  getItemTitle,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
   const table = useReactTable({
@@ -69,28 +77,36 @@ export function DataTable<TData, TValue>({
       pagination,
     },
   });
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  const selectedItems = Object.keys(rowSelection).reduce(
+    (acc: TData[], index) => {
+      acc.push(data[Number(index)]);
+      return acc;
+    },
+    [],
+  );
 
   return (
     <>
       <div className="h-14 flex items-center">
         {Object.keys(rowSelection).length > 0 && (
-          <Button
-            size="icon"
-            variant="destructive"
-            onClick={() => {
-              const items = Object.keys(rowSelection).reduce(
-                (acc: TData[], index) => {
-                  acc.push(data[Number(index)]);
-                  return acc;
-                },
-                [],
-              );
-              onDelete(items);
-              setRowSelection({});
-            }}
-          >
-            <Trash2Icon />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="destructive"
+                onClick={() => {
+                  setDeleteModalOpen(true);
+                }}
+              >
+                <Trash2Icon />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete selected items</p>
+            </TooltipContent>
+          </Tooltip>
         )}
       </div>
       <div className="overflow-hidden rounded-md border">
@@ -144,6 +160,18 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
+      {selectedItems.length > 0 && (
+        <DeleteModal
+          open={deleteModalOpen}
+          onOpenChange={setDeleteModalOpen}
+          onConfirm={() => {
+            onDelete(selectedItems);
+            setRowSelection({});
+          }}
+          items={selectedItems}
+          getTitle={getItemTitle}
+        />
+      )}
     </>
   );
 }

@@ -108,6 +108,7 @@ export function List() {
           }
         }}
         totalItems={data.total}
+        getItemTitle={(item) => item.todo}
       />
     </>
   );
