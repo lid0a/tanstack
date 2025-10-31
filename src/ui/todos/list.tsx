@@ -2,33 +2,18 @@ import { useDeleteTodo, useTodos, type Todo } from "~/api/todos";
 import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "~/ui/shared/data-table";
 import { Badge } from "~/components/ui/badge";
-import { Checkbox } from "~/components/ui/checkbox";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { ButtonGroup } from "~/components/ui/button-group";
+import { Button } from "~/components/ui/button";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "~/components/ui/input-group";
+import { SearchIcon } from "lucide-react";
 
 const columns: ColumnDef<Todo>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
   {
     accessorKey: "id",
     header: "ID",
@@ -76,6 +61,17 @@ export function List() {
 
   return (
     <>
+      <div>
+        <ButtonGroup>
+          <InputGroup>
+            <InputGroupAddon>
+              <SearchIcon />
+            </InputGroupAddon>
+            <InputGroupInput />
+          </InputGroup>
+          <Button>Search</Button>
+        </ButtonGroup>
+      </div>
       <DataTable
         columns={columns}
         data={[...data.todos]}

@@ -43,6 +43,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { ButtonGroup } from "~/components/ui/button-group";
+import { Checkbox } from "~/components/ui/checkbox";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -67,9 +68,34 @@ export function DataTable<TData, TValue>({
   const [itemToDelete, setItemToDelete] = useState<TData | null>(null);
   const table = useReactTable({
     data,
-    columns: columns.concat([
+    columns: [
       {
-        accessorKey: "actions",
+        id: "select",
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      },
+      ...columns,
+      {
+        id: "actions",
         header: "Actions",
         cell({ row }) {
           return (
@@ -86,8 +112,10 @@ export function DataTable<TData, TValue>({
             </ButtonGroup>
           );
         },
+        enableSorting: false,
+        enableHiding: false,
       },
-    ]),
+    ],
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onRowSelectionChange: setRowSelection,
