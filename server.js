@@ -195,8 +195,18 @@ fastify.register(cors, { methods: "*" });
 fastify.get("/todos", async (request) => {
   const limit = Number(request.query.limit ?? 10);
   const skip = Number(request.query.skip ?? 0);
-  const page = todos.slice(skip, skip + limit);
-  return { limit, skip, todos: page, total: todos.length };
+  const search = request.query.search;
+  const filtered = todos.filter((todo) =>
+    search
+      ? todo.todo.toLowerCase().includes(search.trim().toLowerCase())
+      : todo,
+  );
+  return {
+    limit,
+    skip,
+    todos: filtered.slice(skip, skip + limit),
+    total: filtered.length,
+  };
 });
 
 fastify.get("/todos/:id", async (request, reply) => {
