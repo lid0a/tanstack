@@ -42,6 +42,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { ButtonGroup } from "~/components/ui/button-group";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -63,9 +64,30 @@ export function DataTable<TData, TValue>({
   getItemTitle,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
+  const [itemToDelete, setItemToDelete] = useState<TData | null>(null);
   const table = useReactTable({
     data,
-    columns,
+    columns: columns.concat([
+      {
+        accessorKey: "actions",
+        header: "Actions",
+        cell({ row }) {
+          return (
+            <ButtonGroup>
+              <Button
+                variant="destructive"
+                size="icon"
+                onClick={() => {
+                  setItemToDelete(row.original);
+                }}
+              >
+                <Trash2Icon />
+              </Button>
+            </ButtonGroup>
+          );
+        },
+      },
+    ]),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onRowSelectionChange: setRowSelection,
@@ -169,6 +191,19 @@ export function DataTable<TData, TValue>({
             setRowSelection({});
           }}
           items={selectedItems}
+          getTitle={getItemTitle}
+        />
+      )}
+      {itemToDelete && (
+        <DeleteModal
+          open
+          onOpenChange={() => {
+            setItemToDelete(null);
+          }}
+          onConfirm={() => {
+            onDelete([itemToDelete]);
+          }}
+          items={[itemToDelete]}
           getTitle={getItemTitle}
         />
       )}
