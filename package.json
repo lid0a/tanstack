@@ -7,7 +7,7 @@
     "dev": "concurrently \"node server\" \"vite\"",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "node server & vite preview"
+    "preview": "concurrently \"node server\" \"vite preview\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
