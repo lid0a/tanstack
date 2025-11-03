@@ -23,7 +23,30 @@ export const paginationStore = createStore<PaginationStore>()(
       setLimit: (limit: number) => set(() => ({ limit })),
     }),
     {
-      name: "pagination",
+      name: "pagination-storage",
+      storage: createJSONStorage(() => searchParamsStorage),
+    },
+  ),
+);
+
+type SearchState = {
+  query?: string;
+};
+
+type SearchActions = {
+  setQuery: (query?: string) => void;
+};
+
+type SearchStore = SearchState & SearchActions;
+
+export const searchStore = createStore<SearchStore>()(
+  persist(
+    (set) => ({
+      query: new URL(location.href).searchParams.get("search") ?? undefined,
+      setQuery: (query?: string) => set({ query }),
+    }),
+    {
+      name: "search-storage",
       storage: createJSONStorage(() => searchParamsStorage),
     },
   ),

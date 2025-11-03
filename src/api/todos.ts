@@ -23,8 +23,9 @@ export type UpdateTodoDto = Partial<Omit<Todo, "id">>;
 export async function getTodos({
   limit = 10,
   skip = 0,
-}: { limit?: number; skip?: number } = {}) {
-  return await request<TodoCollection>("todos", { limit, skip });
+  search,
+}: { limit?: number; skip?: number; search?: string } = {}) {
+  return await request<TodoCollection>("todos", { limit, skip, search });
 }
 
 export async function getTodo(id: number) {
@@ -54,8 +55,9 @@ export async function deleteTodo(id: number) {
 export function useTodos({
   limit,
   skip,
-}: { limit?: number; skip?: number } = {}) {
-  const queryKey = ["todos", { limit, skip }] as const;
+  search,
+}: { limit?: number; skip?: number; search?: string } = {}) {
+  const queryKey = ["todos", { limit, skip, search }] as const;
   return useQuery({
     queryKey,
     queryFn: ({ queryKey: [, params] }) => getTodos(params),

@@ -11,10 +11,10 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "~/components/ui/input-group";
-import { SearchIcon } from "lucide-react";
-import { useStore } from "zustand";
-import { useEffect } from "react";
-import { paginationStore } from "~/stores/todos";
+import { SearchIcon, XIcon } from "lucide-react";
+import { create, useStore } from "zustand";
+import { useEffect, type FormEvent } from "react";
+import { paginationStore, searchStore } from "~/stores/todos";
 
 const columns: ColumnDef<Todo>[] = [
   {
@@ -45,17 +45,35 @@ const columns: ColumnDef<Todo>[] = [
   },
 ];
 
+type SearchState = {
+  query: string;
+};
+
+type SearchActions = {
+  setQuery: (query: string) => void;
+};
+
+const useSearch = create<SearchState & SearchActions>((set) => ({
+  query: searchStore.getState().query ?? "",
+  setQuery: (query: string) => set({ query }),
+}));
+
 export function List() {
   const navigate = useNavigate();
   const page = useStore(paginationStore, (state) => state.page);
   const limit = useStore(paginationStore, (state) => state.limit);
+  const setPage = useStore(paginationStore, (state) => state.setPage);
+  const setLimit = useStore(paginationStore, (state) => state.setLimit);
+  const searchQuery = useStore(searchStore, (state) => state.query);
+  const setSearchQuery = useStore(searchStore, (state) => state.setQuery);
+  const searchInputValue = useSearch((state) => state.query);
+  const setSearchInputValue = useSearch((state) => state.setQuery);
   const { data, isPending, error, refetch } = useTodos({
     limit,
     skip: (page - 1) * limit,
+    search: searchQuery,
   });
   const { mutate } = useDeleteTodo();
-  const setPage = useStore(paginationStore, (state) => state.setPage);
-  const setLimit = useStore(paginationStore, (state) => state.setLimit);
 
   useEffect(() => {
     return paginationStore.subscribe((state) => {
@@ -65,9 +83,27 @@ export function List() {
           page: state.page,
           limit: state.limit,
         },
+        replace: true,
       });
     });
   }, []);
+
+  useEffect(() => {
+    return searchStore.subscribe((state) => {
+      navigate({
+        from: "/todos",
+        search: {
+          search: state.query,
+        },
+        replace: true,
+      });
+    });
+  }, []);
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSearchQuery(searchInputValue);
+  };
 
   if (isPending) {
     return "Pending...";
@@ -80,15 +116,35 @@ export function List() {
   return (
     <>
       <div>
-        <ButtonGroup>
-          <InputGroup>
-            <InputGroupAddon>
-              <SearchIcon />
-            </InputGroupAddon>
-            <InputGroupInput />
-          </InputGroup>
-          <Button>Search</Button>
-        </ButtonGroup>
+        <form onSubmit={handleSearchSubmit}>
+          <ButtonGroup>
+            <InputGroup>
+              <InputGroupAddon>
+                <SearchIcon />
+              </InputGroupAddon>
+              <InputGroupInput
+                value={searchInputValue}
+                onChange={(event) => {
+                  setSearchInputValue(event.currentTarget.value);
+                }}
+              />
+              <InputGroupAddon align="inline-end">
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setSearchInputValue("");
+                    setSearchQuery(undefined);
+                  }}
+                >
+                  <XIcon />
+                </Button>
+              </InputGroupAddon>
+            </InputGroup>
+            <Button>Search</Button>
+          </ButtonGroup>
+        </form>
       </div>
       <DataTable
         columns={columns}

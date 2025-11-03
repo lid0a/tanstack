@@ -9,6 +9,7 @@ export const Route = createFileRoute("/todos/")({
   validateSearch: z.object({
     page: z.int().min(1).default(1),
     limit: z.int().min(1).default(10),
+    search: z.string().optional(),
   }),
 });
 
