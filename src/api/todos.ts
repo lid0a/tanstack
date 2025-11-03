@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
 import { request } from "./request";
 
 export type Todo = {
@@ -20,11 +20,17 @@ export type CreateTodoDto = Pick<Todo, "todo" | "userId"> &
 
 export type UpdateTodoDto = Partial<Omit<Todo, "id">>;
 
+export type GetTodosParams = {
+  limit?: number;
+  skip?: number;
+  search?: string;
+};
+
 export async function getTodos({
   limit = 10,
   skip = 0,
   search,
-}: { limit?: number; skip?: number; search?: string } = {}) {
+}: GetTodosParams = {}) {
   return await request<TodoCollection>("todos", { limit, skip, search });
 }
 
@@ -52,13 +58,9 @@ export async function deleteTodo(id: number) {
   });
 }
 
-export function useTodos({
-  limit,
-  skip,
-  search,
-}: { limit?: number; skip?: number; search?: string } = {}) {
-  const queryKey = ["todos", { limit, skip, search }] as const;
-  return useQuery({
+export function getTodosQueryOptions(params: GetTodosParams = {}) {
+  const queryKey = ["todos", params] as const;
+  return queryOptions({
     queryKey,
     queryFn: ({ queryKey: [, params] }) => getTodos(params),
   });

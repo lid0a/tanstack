@@ -1,4 +1,4 @@
-import { useDeleteTodo, useTodos, type Todo } from "~/api/todos";
+import { getTodosQueryOptions, useDeleteTodo, type Todo } from "~/api/todos";
 import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "~/ui/shared/data-table";
 import { Badge } from "~/components/ui/badge";
@@ -15,6 +15,7 @@ import { SearchIcon, XIcon } from "lucide-react";
 import { create, useStore } from "zustand";
 import { useEffect, type FormEvent } from "react";
 import { paginationStore, searchStore } from "~/stores/todos";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 const columns: ColumnDef<Todo>[] = [
   {
@@ -68,11 +69,13 @@ export function List() {
   const setSearchQuery = useStore(searchStore, (state) => state.setQuery);
   const searchInputValue = useSearch((state) => state.query);
   const setSearchInputValue = useSearch((state) => state.setQuery);
-  const { data, isPending, error, refetch } = useTodos({
-    limit,
-    skip: (page - 1) * limit,
-    search: searchQuery,
-  });
+  const { data, refetch } = useSuspenseQuery(
+    getTodosQueryOptions({
+      limit,
+      skip: (page - 1) * limit,
+      search: searchQuery,
+    }),
+  );
   const { mutate } = useDeleteTodo();
 
   useEffect(() => {
@@ -104,14 +107,6 @@ export function List() {
     event.preventDefault();
     setSearchQuery(searchInputValue);
   };
-
-  if (isPending) {
-    return "Pending...";
-  }
-
-  if (error) {
-    return error.message;
-  }
 
   return (
     <>
