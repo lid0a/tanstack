@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 
-export function Error({ error }: ErrorComponentProps) {
+export function ErrorComponent({ error }: ErrorComponentProps) {
   const router = useRouter();
   const queryErrorResetBoundary = useQueryErrorResetBoundary();
   const [isRetrying, setIsRetrying] = useState(false);

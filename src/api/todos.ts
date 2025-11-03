@@ -66,9 +66,9 @@ export function getTodosQueryOptions(params: GetTodosParams = {}) {
   });
 }
 
-export function useTodo(id: number) {
+export function getTodoQueryOptions(id: number) {
   const queryKey = ["todos", id] as const;
-  return useQuery({
+  return queryOptions({
     queryKey,
     queryFn: ({ queryKey: [, id] }) => getTodo(id),
   });
