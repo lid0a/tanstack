@@ -2,7 +2,7 @@ import { useDeleteTodo, useTodos, type Todo } from "~/api/todos";
 import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "~/ui/shared/data-table";
 import { Badge } from "~/components/ui/badge";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { ButtonGroup } from "~/components/ui/button-group";
 import { Button } from "~/components/ui/button";
@@ -12,6 +12,9 @@ import {
   InputGroupInput,
 } from "~/components/ui/input-group";
 import { SearchIcon } from "lucide-react";
+import { useStore } from "zustand";
+import { useEffect } from "react";
+import { paginationStore } from "~/stores/todos";
 
 const columns: ColumnDef<Todo>[] = [
   {
@@ -43,13 +46,28 @@ const columns: ColumnDef<Todo>[] = [
 ];
 
 export function List() {
-  const { page, limit } = useSearch({ from: "/todos/" });
   const navigate = useNavigate();
+  const page = useStore(paginationStore, (state) => state.page);
+  const limit = useStore(paginationStore, (state) => state.limit);
   const { data, isPending, error, refetch } = useTodos({
     limit,
     skip: (page - 1) * limit,
   });
   const { mutate } = useDeleteTodo();
+  const setPage = useStore(paginationStore, (state) => state.setPage);
+  const setLimit = useStore(paginationStore, (state) => state.setLimit);
+
+  useEffect(() => {
+    return paginationStore.subscribe((state) => {
+      navigate({
+        from: "/todos",
+        search: {
+          page: state.page,
+          limit: state.limit,
+        },
+      });
+    });
+  }, []);
 
   if (isPending) {
     return "Pending...";
@@ -81,14 +99,8 @@ export function List() {
             typeof updater === "function"
               ? updater({ pageIndex: page - 1, pageSize: limit })
               : updater;
-
-          navigate({
-            from: "/todos",
-            search: {
-              page: nextState.pageIndex + 1,
-              limit: nextState.pageSize,
-            },
-          });
+          setPage(nextState.pageIndex + 1);
+          setLimit(nextState.pageSize);
         }}
         onDelete={async (items) => {
           for (const item of items) {
