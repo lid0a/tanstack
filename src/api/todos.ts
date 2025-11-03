@@ -1,4 +1,4 @@
-import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
+import { queryOptions, useMutation } from "@tanstack/react-query";
 import { request } from "./request";
 
 export type Todo = {
