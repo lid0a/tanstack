@@ -123,19 +123,21 @@ export function List() {
                   setSearchInputValue(event.currentTarget.value);
                 }}
               />
-              <InputGroupAddon align="inline-end">
-                <Button
-                  type="button"
-                  size="icon-sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setSearchInputValue("");
-                    setSearchQuery(undefined);
-                  }}
-                >
-                  <XIcon />
-                </Button>
-              </InputGroupAddon>
+              {searchInputValue && (
+                <InputGroupAddon align="inline-end">
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setSearchInputValue("");
+                      setSearchQuery(undefined);
+                    }}
+                  >
+                    <XIcon />
+                  </Button>
+                </InputGroupAddon>
+              )}
             </InputGroup>
             <Button>Search</Button>
           </ButtonGroup>
