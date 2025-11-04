@@ -3,12 +3,10 @@ import { List } from "~/ui/todos/list";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { PlusIcon } from "lucide-react";
-import { getTodosQueryOptions } from "~/api/todos";
-import { QueryClient } from "@tanstack/react-query";
+import { getTodosQueryOptions } from "~/queries/todos";
 import { ErrorComponent } from "~/ui/shared/error-component";
 import { PendingComponent } from "~/ui/shared/pending-component";
-
-const queryClient = new QueryClient();
+import { queryClient } from "~/queries/client";
 
 export const Route = createFileRoute("/todos/")({
   loaderDeps: ({ search }) => search,

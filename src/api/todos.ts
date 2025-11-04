@@ -1,4 +1,3 @@
-import { queryOptions, useMutation } from "@tanstack/react-query";
 import { request } from "./request";
 
 export type Todo = {
@@ -55,43 +54,5 @@ export async function updateTodo(id: number, dto: UpdateTodoDto) {
 export async function deleteTodo(id: number) {
   return await request<void>(`todos/${id}`, undefined, {
     method: "DELETE",
-  });
-}
-
-export function getTodosQueryOptions(params: GetTodosParams = {}) {
-  const queryKey = ["todos", params] as const;
-  return queryOptions({
-    queryKey,
-    queryFn: ({ queryKey: [, params] }) => getTodos(params),
-  });
-}
-
-export function getTodoQueryOptions(id: number) {
-  const queryKey = ["todos", id] as const;
-  return queryOptions({
-    queryKey,
-    queryFn: ({ queryKey: [, id] }) => getTodo(id),
-  });
-}
-
-export function useUpdateTodo(id: number) {
-  const mutationKey = ["todos", id] as const;
-  return useMutation({
-    mutationKey,
-    mutationFn: (dto: UpdateTodoDto) => updateTodo(id, dto),
-  });
-}
-
-export function useCreateTodo() {
-  const mutationKey = ["todos/add"] as const;
-  return useMutation({
-    mutationKey,
-    mutationFn: (dto: CreateTodoDto) => createTodo(dto),
-  });
-}
-
-export function useDeleteTodo() {
-  return useMutation({
-    mutationFn: (id: number) => deleteTodo(id),
   });
 }

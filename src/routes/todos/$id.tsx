@@ -1,12 +1,11 @@
-import { QueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { getTodoQueryOptions, useUpdateTodo } from "~/api/todos";
+import { queryClient } from "~/queries/client";
+import { getTodoQueryOptions, useUpdateTodo } from "~/queries/todos";
 import { ErrorComponent } from "~/ui/shared/error-component";
 import { PendingComponent } from "~/ui/shared/pending-component";
 import { Form } from "~/ui/todos/form";
-
-const queryClient = new QueryClient();
 
 export const Route = createFileRoute("/todos/$id")({
   component: RouteComponent,

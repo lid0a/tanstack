@@ -6,20 +6,20 @@ import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 import tanstackQuery from "@tanstack/eslint-plugin-query";
 
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs["recommended-latest"],
-      reactRefresh.configs.vite,
-      tanstackQuery.configs.recommended,
-    ],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-    },
+export default defineConfig(globalIgnores(["dist"]), {
+  extends: [
+    js.configs.recommended,
+    tseslint.configs.recommended,
+    reactHooks.configs.flat["recommended-latest"],
+    reactRefresh.configs.vite,
+    tanstackQuery.configs["flat/recommended"],
+  ],
+  files: ["**/*.{ts,tsx}"],
+  languageOptions: {
+    ecmaVersion: 2020,
+    globals: globals.browser,
   },
-]);
+  rules: {
+    "react-refresh/only-export-components": "off",
+  },
+});

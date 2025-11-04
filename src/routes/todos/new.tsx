@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { useCreateTodo } from "~/api/todos";
+import { useCreateTodo } from "~/queries/todos";
 import { Form } from "~/ui/todos/form";
 
 export const Route = createFileRoute("/todos/new")({

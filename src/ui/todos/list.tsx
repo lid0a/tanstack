@@ -1,4 +1,4 @@
-import { getTodosQueryOptions, useDeleteTodo, type Todo } from "~/api/todos";
+import { getTodosQueryOptions, useDeleteTodo } from "~/queries/todos";
 import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "~/ui/shared/data-table";
 import { Badge } from "~/components/ui/badge";
@@ -16,6 +16,7 @@ import { create, useStore } from "zustand";
 import { useEffect, type FormEvent } from "react";
 import { paginationStore, searchStore } from "~/stores/todos";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import type { Todo } from "~/api/todos";
 
 const columns: ColumnDef<Todo>[] = [
   {
@@ -89,7 +90,7 @@ export function List() {
         replace: true,
       });
     });
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     return searchStore.subscribe((state) => {
@@ -101,7 +102,7 @@ export function List() {
         replace: true,
       });
     });
-  }, []);
+  }, [navigate]);
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
