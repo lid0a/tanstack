@@ -1,8 +1,12 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { queryClient } from "~/queries/client";
-import { getTodoQueryOptions, useUpdateTodo } from "~/queries/todos";
+import {
+  getTodoQueryOptions,
+  getTodosQueryOptions,
+  useUpdateTodo,
+} from "~/queries/todos";
 import { ErrorComponent } from "~/ui/shared/error-component";
 import { PendingComponent } from "~/ui/shared/pending-component";
 import { Form } from "~/ui/todos/form";
@@ -19,8 +23,9 @@ export const Route = createFileRoute("/todos/$id")({
 function RouteComponent() {
   const params = Route.useParams();
   const id = Number(params.id);
-  const { data, refetch } = useSuspenseQuery(getTodoQueryOptions(id));
+  const { data } = useSuspenseQuery(getTodoQueryOptions(id));
   const { mutate, isPending: isMutationPending } = useUpdateTodo(id);
+  const queryClient = useQueryClient();
 
   return (
     <Form
@@ -28,8 +33,14 @@ function RouteComponent() {
       defaultValues={data}
       onSubmit={(data) => {
         mutate(data, {
-          onSuccess() {
-            refetch();
+          onSuccess(todo, variables) {
+            queryClient.setQueryData(getTodoQueryOptions(id).queryKey, {
+              ...todo,
+              ...variables,
+            });
+            queryClient.invalidateQueries({
+              queryKey: getTodosQueryOptions().queryKey,
+            });
             toast.success("Updated successfully");
           },
           onError(error) {
